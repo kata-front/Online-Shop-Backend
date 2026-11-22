@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Секреты
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+
+# Прочее
+*.log
+.DS_Store
