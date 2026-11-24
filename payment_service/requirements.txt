@@ -1,0 +1,6 @@
+fastapi
+httpx
+sqlalchemy[asyncio]
+asyncpg
+pydantic-settings
+uvicorn

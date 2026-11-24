@@ -15,11 +15,11 @@ class CatalogService:
 
         return [ProductReadSchema.model_validate(product) for product in products]
 
-    async def get_by_id(self, id: UUID) -> ProductReadSchema | None:
+    async def get_by_id(self, id: UUID) -> ProductReadSchema:
         product = await self.db.get(ProductORM, id)
 
         if product is None:
-            return None
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
         return ProductReadSchema.model_validate(product)
 
