@@ -10,11 +10,16 @@ from .service import OrderService
 from .schemas import OrderCreateSchema, OrderReadSchema
 from .models import Base
 from .database import engine
+from .rabbitmq import connect_rabbitmq, start_payments_consume
+from .config import settings
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    connection = await connect_rabbitmq(settings.rebbitmq_url)
+    await start_payments_consume(connection)
 
     yield
 

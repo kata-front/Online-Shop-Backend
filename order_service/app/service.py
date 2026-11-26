@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .clients.payment_client import PaymentClient
 from .clients.catalog_client import CatalogClient
 from .schemas import OrderCreateSchema, OrderReadSchema, OrderItemReadSchema
 from .models import OrderItem, OrderORM
@@ -15,10 +16,12 @@ class OrderService:
     def __init__(
             self, 
             db: AsyncSession, 
-            catalog_client: CatalogClient
+            catalog_client: CatalogClient,
+            payment_client: PaymentClient
         ):
         self.db = db
         self.catalog_client = catalog_client
+        self.payment_client = payment_client
 
     async def get_orders(self) -> list[OrderReadSchema]:
         orders = (await self.db.scalars(
@@ -66,6 +69,10 @@ class OrderService:
             self.db.add(OrderItem(order_id=order.id, **item))
 
         await self.db.commit()
+
+        await self.payment_client.create_payment(
+            order.id, order.user_id, order.total_amount
+        )
 
         return OrderReadSchema(
             id=order.id,

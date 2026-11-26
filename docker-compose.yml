@@ -43,6 +43,21 @@ services:
             timeout: 5s
             retries: 5
 
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: rabbitmq
+        ports:
+            - '5672:5672'
+            - '15672:15672'
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        healthcheck:
+            test: ["CMD", "rabbitmq-diagnostics", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
     catalog-service:
         build: ./catalog_service
         environment:
@@ -57,18 +72,24 @@ services:
         build: ./order_service
         environment:
             DB_URL: postgresql+asyncpg://orders:orders@orders-db:5432/orders
+            REBITMQ_URL: amqp://guest:guest@rabbitmq:5672
         ports:
           - '8002:8000'
         depends_on:
             orders-db:
+                condition : service_healthy
+            rabbitmq:
                 condition : service_healthy
 
     payment-service:
         build: ./payment_service
         environment:
             DB_URL: postgresql+asyncpg://payments:payments@payments-db:5432/payments
+            REBITMQ_URL: amqp://guest:guest@rabbitmq:5672
         ports:
           - '8003:8000'
         depends_on:
-            orders-db:
+            payments-db:
+                condition : service_healthy
+            rabbitmq:
                 condition : service_healthy

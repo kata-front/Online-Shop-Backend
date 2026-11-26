@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class PaymentReadSchema(BaseModel):
     id: UUID
     order_id: UUID
+    user_id: UUID
     status: str
     amount: int
     created_at: datetime
@@ -16,3 +17,4 @@ class PaymentReadSchema(BaseModel):
 class PaymentCreateSchema(BaseModel):
     order_id: UUID
     amount: int
+    user_id: UUID

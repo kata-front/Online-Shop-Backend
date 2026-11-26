@@ -1,10 +1,14 @@
 import asyncio
-from uuid import UUID
+from uuid import UUID, uuid4
+
+from aio_pika.abc import AbstractExchange
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .config import settings
+from .rabbitmq import publish_json
 from .clients.order_client import OrderClient
 from .models import PaymentORM
 from .schemas import PaymentReadSchema, PaymentCreateSchema
@@ -33,7 +37,7 @@ class PaymentService:
 
         return PaymentReadSchema.model_validate(payment)
 
-    async def create_payment(self, payload: PaymentCreateSchema) -> PaymentReadSchema:
+    async def create_payment(self, payload: PaymentCreateSchema) -> PaymentORM:
         order = await self.order_client.get_order(payload.order_id)
 
         if order is None:
@@ -49,7 +53,27 @@ class PaymentService:
 
         await self.db.refresh(payment)
 
-        return PaymentReadSchema.model_validate(payment)
+        return payment
 
-    async def confirm_payment(self):
+    async def confirm_payment(
+        self, 
+        payment: PaymentORM,
+        order_id: str,
+        user_id: str,
+        amount: str,
+        exchange: AbstractExchange
+    ):
         await asyncio.sleep(4)
+
+        payment.status = 'suceeded'
+        await self.db.commit()
+
+        event = {
+            'event_id': str(uuid4()),
+            'order_id': order_id,
+            'status': 'succeeded',
+            'amount': amount,
+            'user_id': user_id
+        }
+
+        await publish_json(exchange, settings.payment_succeeded_routimg_key, event)

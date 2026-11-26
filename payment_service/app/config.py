@@ -7,5 +7,9 @@ class Settings(BaseSettings):
 
     db_url: str = 'postgresql+asyncpg://payments:payments@payments-db:5432/payments'
     order_base_uri: str = "http://order-service:8000"
+    rebbitmq_url: str = "amqp://guest:guest@rabbitmq:5672"
+
+    payment_succeeded_routimg_key: str = 'payment.succeeded'
+    payment_exchange_name: str = 'payment.events'
 
 settings = Settings()

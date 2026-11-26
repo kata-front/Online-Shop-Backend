@@ -14,6 +14,7 @@ class Base(DeclarativeBase):
 class PaymentORM(Base):
     __tablename__="payments"
 
+    user_id: Mapped [UUID]
     order_id: Mapped[UUID]
     status: Mapped[str] = mapped_column(default='created')
     amount: Mapped[int]
