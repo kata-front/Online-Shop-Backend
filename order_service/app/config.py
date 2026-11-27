@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     rebbitmq_url: str = "amqp://guest:guest@rabbitmq:5672"
     payment_succeeded_routimg_key: str = 'payment.succeeded'
-    payment_queue_name: str = 'payments.results'
+    payment_queue_name: str = 'orders.payments.results'
     payment_exchange_name: str = 'payment.events'
 
 settings = Settings()

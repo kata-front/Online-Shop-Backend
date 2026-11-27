@@ -43,6 +43,20 @@ services:
             timeout: 5s
             retries: 5
 
+    notifs-db:
+        image: postgres:16-alpine
+        environment:
+            POSTGRES_USER: notifs
+            POSTGRES_PASSWORD: notifs
+            POSTGRES_DB: notifs
+        ports:
+            - '5435:5432'
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U notifs -d notifs"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
     rabbitmq:
         image: rabbitmq:3-management
         container_name: rabbitmq
@@ -90,6 +104,19 @@ services:
           - '8003:8000'
         depends_on:
             payments-db:
+                condition : service_healthy
+            rabbitmq:
+                condition : service_healthy
+
+    notifs-service:
+        build: ./notification-service
+        environment:
+            DB_URL: postgresql+asyncpg://notifs:notifs@notifs-db:5432/notifs
+            REBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+        ports:
+          - '8004:8000'
+        depends_on:
+            notifs-db:
                 condition : service_healthy
             rabbitmq:
                 condition : service_healthy

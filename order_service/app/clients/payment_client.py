@@ -13,7 +13,7 @@ class PaymentClient:
         }
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.url}/payments/{order_id}",
+                f"{self.url}/payments",
                 json=json_data
             )
         return response.json()

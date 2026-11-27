@@ -1,3 +1,6 @@
+from fastapi import HTTPException
+
+from starlette import status
 from uuid import UUID
 
 from sqlalchemy import select
